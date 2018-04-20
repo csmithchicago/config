@@ -6,9 +6,9 @@
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+PROPERTY: header-args :tangle yes
 
-
 * Overview
 
+Some of these functions are from https://github.com/sachac/.emacs.d/blob/gh-pages/Sacha.org .
 * git initialization
 There is no reason to track the init.el that is generated; by running
 the following command git will not bother tracking it:
@@ -41,6 +41,66 @@ git update-index --no-assume-unchanged init.el
   ;; Following line is not needed if use-package.el is in ~/.emacs.d
   (add-to-list 'load-path "<path where use-package is installed>")
   (require 'use-package))
+#+END_SRC
+
+* emacs and skim
+#+BEGIN_SRC emacs-lisp :tangle no
+;; Starts the Emacs server
+(server-start)
+;; Auto-raise Emacs on activation
+(defun raise-emacs-on-aqua() 
+    (shell-command "osascript -e 'tell application \"Emacs\" to activate' &"))
+(add-hook 'server-switch-hook 'raise-emacs-on-aqua)
+;; The following only works with AUCTeX loaded
+(require 'tex-site)
+(add-hook 'TeX-mode-hook
+    (lambda ()
+        (add-to-list 'TeX-output-view-style
+            '("^pdf$" "."
+              "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b")))
+)
+
+;; Use PDF mode by default
+(setq-default TeX-PDF-mode t)
+;; Make emacs aware of multi-file projects
+(setq-default TeX-master nil)
+
+#+END_SRC
+* Backups
+
+This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+ (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+#+END_SRC
+
+Disk space is cheap. Save lots.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+#+END_SRC
+
+* History
+
+From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq savehist-file "~/.emacs.d/savehist")
+(savehist-mode 1)
+(setq history-length t)
+(setq history-delete-duplicates t)
+(setq savehist-save-minibuffer-history 1)
+(setq savehist-additional-variables
+      '(kill-ring
+        search-ring
+        regexp-search-ring))
+#+END_SRC
+
+* Org Mode
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t)
 #+END_SRC
 
 * remove compilled files
@@ -87,9 +147,39 @@ git update-index --no-assume-unchanged init.el
 #+END_SRC
 
 * auto complete
-( use-package auto-complete
+#+BEGIN_SRC emacs-lisp
+(use-package auto-complete
   :ensure t)
+#+END_SRC
+Dont pay attention to image files and compiled files
+#+BEGIN_SRC emacs-lisp
+;https://stackoverflow.com/a/43204202
+(setq completion-ignored-extensions
+    (append completion-ignored-extensions
+        (quote
+        (".tif" ".png" ".jpg" ".pyc" ".so" ".gif"))))
+#+END_SRC
+* Pdf viewing
+#+BEGIN_SRC emacs-lisp
+(setq doc-view-ghostscript-program "/usr/local/bin/gs")
 
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle no
+;;; https://emacs.stackexchange.com/a/22591
+;;; Install epdfinfo via 'brew install pdf-tools' and then install the
+;;; pdf-tools elisp via the use-package below. To upgrade the epdfinfo
+;;; server, just do 'brew upgrade pdf-tools' prior to upgrading to newest
+;;; pdf-tools package using Emacs package system. If things get messed
+;;; up, just do 'brew uninstall pdf-tools', wipe out the elpa
+;;; pdf-tools package and reinstall both as at the start.
+(use-package pdf-tools
+  :ensure t
+  :config
+  (custom-set-variables
+    '(pdf-tools-handle-upgrades nil)) ; Use brew upgrade pdf-tools instead.
+  (setq pdf-info-epdfinfo-program "/Applications/Skim.app/Contents/MacOS/Skim"));;"/usr/local/bin/epdfinfo"))
+(pdf-tools-install)
+#+END_SRC
 * fly check
 #+BEGIN_SRC emacs-lisp
 ;; fly-check
@@ -97,7 +187,7 @@ git update-index --no-assume-unchanged init.el
   :ensure t
   :init (global-flycheck-mode))
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
+(add-hook 'after-init-hook 'global-flycheck-mode)
 #+END_SRC
 
 * ido mode
@@ -197,5 +287,10 @@ Changing Window size tends to execute the same command continuously. It is borin
 * user info
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Corey D Smith")
- (setq user-mail-address "coreys@uchicago.edu") 
+(setq user-mail-address "coreys@uchicago.edu") 
+#+END_SRC
+
+** yes no
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
