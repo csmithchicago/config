@@ -102,7 +102,6 @@ From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
 #+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t)
 #+END_SRC
-
 * remove compilled files
 #+BEGIN_SRC emacs-lisp
 (defun remove-elc-on-save ()
@@ -264,7 +263,6 @@ Changing Window size tends to execute the same command continuously. It is borin
 
 #+END_SRC
 
-
 * tangle init automatically
 #+BEGIN_SRC emacs-lisp :tangle yes 
  (use-package async 
@@ -293,4 +291,30 @@ Changing Window size tends to execute the same command continuously. It is borin
 ** yes no
 #+BEGIN_SRC emacs-lisp
 (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+* dimming mode
+#+BEGIN_SRC emacs-lisp
+(use-package dimmer
+  :ensure t)
+#+END_SRC
+* undo tree
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :ensure t)
+(global-undo-tree-mode)
+#+END_SRC
+* customization file
+#+BEGIN_SRC emacs-lisp
+;; Place custom commands in another file
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file 'noerror)
+#+END_SRC
+
+
+* switch windows
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-x <up>") 'windmove-up)
+(global-set-key (kbd "C-x <down>") 'windmove-down)
+(global-set-key (kbd "C-x <right>") 'windmove-right)
+(global-set-key (kbd "C-x <left>") 'windmove-left)
 #+END_SRC
