@@ -1,0 +1,16 @@
+* Dotfiles and Configuration Files
+This folder contains files used for customizing different programs.
+
+** Homebrew
+   This list can be used to reinstall all of the packages installed using brew.
+** Bash Profiles
+   The two files bashrc and bash_profile are used for modifing the bash shell.
+** Anaconda Package List
+   File used to reinstall all of the conda packages installed. Can be used for virtual environments.
+** Emacs Init Files
+   settings.org is used installing emacs packages and customizing layout.
+** Link Files Bash Script
+   Bash script that is used to create symbolic links for dotfiles moved into $HOME/config/ . Allows for the 
+   creation of a git repository outside of the home directory.
+** Git Configuration
+   Global git configuration file
