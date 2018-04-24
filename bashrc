@@ -26,3 +26,7 @@ alias em='emacs'
 
 alias skim='/Applications/Skim.app/Contents/MacOS/Skim'
 
+# this is for installing pdf-tools
+# https://github.com/politza/pdf-tools
+export PKG_CONFIG_PATH=/usr/local/Cellar/zlib/1.2.8/lib/pkgconfig:/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
+
