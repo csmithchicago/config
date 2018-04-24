@@ -100,8 +100,103 @@ From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
 
 * Org Mode
 #+BEGIN_SRC emacs-lisp
-(setq org-src-fontify-natively t)
+(use-package org)
+
+;(require 'org-mode)
+(setq org-directory "/Users/CSmith/GoogleDrive/Org/"
+        org-src-fontify-natively t)
+
+(bind-key "M-i" 'org-toggle-inline-images org-mode-map)
+(add-hook 'org-babel-after-execute-hook
+          (lambda () (org-display-inline-images t t)))
+
+;make equations bigger
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t)
+
 #+END_SRC
+
+* org-mode agenda
+#+BEGIN_SRC emacs-lisp
+(use-package org-super-agenda
+  :ensure t
+  :config
+  (org-super-agenda-mode t)
+  (setq org-todo-keywords
+      (quote ((sequence "TODO(t)" "NEXT(n)" "READ(r)" "|" "DONE(d!/!)")
+              (sequence "WAITING(w@/!)" "SOMEDAY(s!)" "|" "CANCELED(c@/!)")
+              (sequence "CANCELED(c@/!)")))))
+
+(let ((org-super-agenda-groups
+       '(;; Each group has an implicit boolean OR operator between its selectors.
+         (:name "Today"  ; Optionally specify section name
+                :time-grid t  ; Items that appear on the time grid
+                :todo "TODAY")  ; Items that have this TODO keyword
+         (:name "Important"
+                ;; Single arguments given alone
+                :tag "finish"
+                :priority "A")
+         ;; Set order of multiple groups at once
+         (:order-multi (2 (:name "things to buy"
+                                 ;; Boolean AND group matches items that match all subgroups
+                                 :and (:tag "shopping" :tag "pickup"))
+                          (:name "Food-related"
+                                 ;; Multiple args given in list with implicit OR
+                                 :tag ("food" "dinner"))
+                          (:name "Personal"
+                                 :habit t
+                                 :tag "personal")))
+         ;; Groups supply their own section names when none are given
+         (:todo "WAITING" :order 8)  ; Set order of this section
+         (:todo ("SOMEDAY" "TO-READ" "CHECK" "TO-WATCH" "WATCHING")
+                ;; Show this group at the end of the agenda (since it has the
+                ;; highest number). If you specified this group last, items
+                ;; with these todo keywords that e.g. have priority A would be
+                ;; displayed in that group instead, because items are grouped
+                ;; out in the order the groups are listed.
+                :order 9)
+         (:priority<= "B"
+                      ;; Show this section after "Today" and "Important", because
+                      ;; their order is unspecified, defaulting to 0. Sections
+                      ;; are displayed lowest-number-first.
+                      :order 1)
+         ;; After the last group, the agenda will display items that didn't
+         ;; match any of these groups, with the default order position of 99
+         )))
+  (org-agenda nil "a"))
+#+END_SRC
+This pulls up my agenda after I am inactive for 5 min while working in emacs.
+http://lists.gnu.org/archive/html/emacs-orgmode/2010-03/msg00367.html
+#+BEGIN_SRC emacs-lisp
+(defun bnb/jump-to-org-agenda ()
+  (interactive)
+  (let ((buf (get-buffer "*Org Agenda*"))
+        wind)
+    (if buf
+        (if (setq wind (get-buffer-window buf))
+            (select-window wind)
+          (if (called-interactively-p)
+              (progn
+                (select-window (display-buffer buf t t))
+                (org-fit-window-to-buffer))
+            (with-selected-window (display-buffer buf)
+              (org-fit-window-to-buffer))))
+       (bnb/org-agenda-with-tip nil))))
+
+(defun bnb/idle-agenda (&optional arg)
+  (interactive "P")
+  (setq bnb/iagenda
+        (if arg
+            (cancel-timer bnb/iagenda)
+          (run-with-idle-timer 360 t 'bnb/jump-to-org-agenda))))
+
+(bnb/idle-agenda)
+#+END_SRC
+
+
 * remove compilled files
 #+BEGIN_SRC emacs-lisp
 (defun remove-elc-on-save ()
@@ -156,7 +251,7 @@ Dont pay attention to image files and compiled files
 (setq completion-ignored-extensions
     (append completion-ignored-extensions
         (quote
-        (".tif" ".png" ".jpg" ".pyc" ".so" ".gif"))))
+        (".tif" ".png" ".jpg" ".pyc" ".so" ".gif" ".pdf"))))
 #+END_SRC
 * Pdf viewing
 #+BEGIN_SRC emacs-lisp
@@ -184,9 +279,8 @@ Dont pay attention to image files and compiled files
 ;; fly-check
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode))
-
-(add-hook 'after-init-hook 'global-flycheck-mode)
+  :init (global-flycheck-mode)
+)
 #+END_SRC
 
 * ido mode
@@ -236,6 +330,7 @@ This is where extra languages are loaded in
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((ipython . t)
+   (latex . t)
    ;; other languages..
    ))
 (setq org-confirm-babel-evaluate nil)
@@ -288,7 +383,7 @@ Changing Window size tends to execute the same command continuously. It is borin
 (setq user-mail-address "coreys@uchicago.edu") 
 #+END_SRC
 
-** yes no
+* yes no
 #+BEGIN_SRC emacs-lisp
 (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
@@ -318,3 +413,33 @@ Changing Window size tends to execute the same command continuously. It is borin
 (global-set-key (kbd "C-x <right>") 'windmove-right)
 (global-set-key (kbd "C-x <left>") 'windmove-left)
 #+END_SRC
+* magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :ensure t)
+#+END_SRC
+* desktop +
+#+BEGIN_SRC emacs-lisp
+(use-package desktop+
+  :ensure t)
+#+END_SRC
+* focus mode
+#+BEGIN_SRC emacs-lisp
+(use-package focus
+  :ensure t
+  :bind
+  ("C-c f" . focus-mode)
+  ("C-c F" . focus-read-only-mode))
+#+END_SRC
+* org-agenda
+* markdown
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+#+END_SRC
+* 
