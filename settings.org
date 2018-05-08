@@ -36,6 +36,10 @@ git update-index --no-assume-unchanged init.el
 
 * use package
 #+BEGIN_SRC emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 ; This is only needed once, near the top of the file
 (eval-when-compile
   ;; Following line is not needed if use-package.el is in ~/.emacs.d
@@ -103,8 +107,11 @@ From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
 (use-package org)
 
 ;(require 'org-mode)
-(setq org-directory "/Users/CSmith/GoogleDrive/Org/"
+(setq org-directory "~/OneDrive/OrgNotes"
         org-src-fontify-natively t)
+
+(setq org-agenda-files (list "~/OneDrive/OrgNotes/research_notes.org"
+                             ))
 
 (bind-key "M-i" 'org-toggle-inline-images org-mode-map)
 (add-hook 'org-babel-after-execute-hook
@@ -123,6 +130,7 @@ From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
 #+BEGIN_SRC emacs-lisp
 (use-package org-super-agenda
   :ensure t
+  :defer t
   :config
   (org-super-agenda-mode t)
   (setq org-todo-keywords
@@ -168,7 +176,7 @@ From http://www.wisdomandwonder.com/wp-content/uploads/2014/03/C3F.html:
          )))
   (org-agenda nil "a"))
 #+END_SRC
-This pulls up my agenda after I am inactive for 5 min while working in emacs.
+This pulls up my agenda after I am inactive for 50 min while working in emacs.
 http://lists.gnu.org/archive/html/emacs-orgmode/2010-03/msg00367.html
 #+BEGIN_SRC emacs-lisp
 (defun bnb/jump-to-org-agenda ()
@@ -191,12 +199,15 @@ http://lists.gnu.org/archive/html/emacs-orgmode/2010-03/msg00367.html
   (setq bnb/iagenda
         (if arg
             (cancel-timer bnb/iagenda)
-          (run-with-idle-timer 360 t 'bnb/jump-to-org-agenda))))
+          (run-with-idle-timer 3600 t 'bnb/jump-to-org-agenda))))
 
 (bnb/idle-agenda)
 #+END_SRC
 
-
+* Auctex
+#+BEGIN_SRC emacs-lisp
+(add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
+#+END_SRC
 * remove compilled files
 #+BEGIN_SRC emacs-lisp
 (defun remove-elc-on-save ()
@@ -234,16 +245,20 @@ http://lists.gnu.org/archive/html/emacs-orgmode/2010-03/msg00367.html
 #+END_SRC
 
 * cuda package
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package cuda-mode
   :ensure t
+  :defer t
 )
 #+END_SRC
-
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.cu$" . c++-mode))
+#+END_SRC
 * auto complete
 #+BEGIN_SRC emacs-lisp
 (use-package auto-complete
-  :ensure t)
+  :ensure t
+  :defer t)
 #+END_SRC
 Dont pay attention to image files and compiled files
 #+BEGIN_SRC emacs-lisp
@@ -268,6 +283,7 @@ Dont pay attention to image files and compiled files
 ;;; pdf-tools package and reinstall both as at the start.
 (use-package pdf-tools
   :ensure t
+  :defer t
   :config
   (custom-set-variables
     '(pdf-tools-handle-upgrades nil)) ; Use brew upgrade pdf-tools instead.
@@ -311,6 +327,7 @@ Dont pay attention to image files and compiled files
 #+BEGIN_SRC emacs-lisp
 (use-package ein
   :ensure t
+  :defer t
   :init
   (setq ein:use-auto-complete t;auto-complete commands
         ein:use-smartrep t;repeating without bindings 
@@ -322,6 +339,9 @@ Setup
 (require 'ein-loaddefs)
 (require 'ein-notebook)
 (require 'ein-subpackages)
+
+(define-key ein:notebook-mode-map "\C-c\C-d"
+            'ein:worksheet-delete-cell)
 #+END_SRC
 
 * Babel Org Mode
@@ -329,19 +349,12 @@ This is where extra languages are loaded in
 #+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((ipython . t)
+ '(;(ipython . t)
    (latex . t)
    ;; other languages..
    ))
 (setq org-confirm-babel-evaluate nil)
 ;(add-hook ‘org-babel-after-execute-hook ‘org-display-inline-images ‘append)
-#+END_SRC
-
-* org ipython
-#+BEGIN_SRC emacs-lisp
-(use-package ob-ipython
-  :ensure t
-)
 #+END_SRC
 * smartrep
 #+BEGIN_SRC emacs-lisp
@@ -381,6 +394,7 @@ Changing Window size tends to execute the same command continuously. It is borin
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Corey D Smith")
 (setq user-mail-address "coreys@uchicago.edu") 
+(setq inhibit-splash-screen t)
 #+END_SRC
 
 * yes no
@@ -416,12 +430,14 @@ Changing Window size tends to execute the same command continuously. It is borin
 * magit
 #+BEGIN_SRC emacs-lisp
 (use-package magit
-  :ensure t)
+  :ensure t
+  :defer t)
 #+END_SRC
 * desktop +
 #+BEGIN_SRC emacs-lisp
 (use-package desktop+
-  :ensure t)
+  :ensure t
+  :defer t)
 #+END_SRC
 * focus mode
 #+BEGIN_SRC emacs-lisp
@@ -436,6 +452,7 @@ Changing Window size tends to execute the same command continuously. It is borin
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :ensure t
+  :defer t
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
