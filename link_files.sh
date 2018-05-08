@@ -11,7 +11,7 @@
 
 dir=~/config                    # dotfiles directory
 olddir=~/old_config             # old dotfiles backup directory
-files="latexmkrc bashrc bash_profile gitconfig"    # list of files/folders to symlink in homedir
+files="latexmkrc gitconfig"    # list of files/folders to symlink in homedir
 
 ##########
 
