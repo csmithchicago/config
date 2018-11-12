@@ -290,6 +290,9 @@ Dont pay attention to image files and compiled files
 (pdf-tools-install)
 #+END_SRC
 * fly check
+(add-to-list 'flycheck-disabled-checkers 'python-flake8)
+(add-to-list 'flycheck-disabled-checkers 'python-pylint)
+I might want to add these when trying to get other checkers to run
 #+BEGIN_SRC emacs-lisp
 ;; fly-check
 (use-package flycheck
@@ -314,6 +317,7 @@ Dont pay attention to image files and compiled files
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook 'flyspell-mode)
 (setq linum-format "%d ")
+(global-linum-mode t)
 #+END_SRC
 
 * key bindings
@@ -343,6 +347,12 @@ Setup
             'ein:worksheet-delete-cell)
 #+END_SRC
 
+* Python
+To use python3 as the default python shell
+#+BEGIN_SRC emacs-lisp
+(setq python-shell-interpreter "/home/coreys/anaconda3/bin/python")
+(setq flycheck-python-pycompile-executable "/home/coreys/anaconda3/bin/python")
+#+END_SRC
 * Babel Org Mode
 This is where extra languages are loaded in
 #+BEGIN_SRC emacs-lisp
